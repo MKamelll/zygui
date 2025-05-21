@@ -7,6 +7,7 @@ mod main_window;
 mod updates_window;
 mod zypper;
 mod header_bar;
+mod stack_switcher;
 
 use main_window::main_window;
 
