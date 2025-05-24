@@ -9,6 +9,7 @@ mod zypper;
 mod header_bar;
 mod stack_switcher;
 mod search_bar;
+mod search_categories_section;
 
 use main_window::main_window;
 
