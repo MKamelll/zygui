@@ -6,10 +6,10 @@ pub fn create_stack() -> Stack {
     let stack = Stack::new();
     stack.set_transition_type(gtk::StackTransitionType::SlideLeftRight);
 
-    stack.add_titled(&Label::new(Some("this is search")), Some("search"), "Search");
-    stack.add_titled(&Label::new(Some("this is installation summary")),
+    stack.add_titled(&Label::new(None), Some("search"), "Search");
+    stack.add_titled(&Label::new(None),
     Some("installation summary"), "Installation Summary");
-    stack.add_titled(&Label::new(Some("this is patterns")), Some("patterns"), "Patterns");
+    stack.add_titled(&Label::new(None), Some("patterns"), "Patterns");
     stack
 }
 

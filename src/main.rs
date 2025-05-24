@@ -8,6 +8,7 @@ mod updates_window;
 mod zypper;
 mod header_bar;
 mod stack_switcher;
+mod search_bar;
 
 use main_window::main_window;
 
