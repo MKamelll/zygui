@@ -225,6 +225,7 @@ static GtkWidget *create_menu_bar()
 static GtkWidget *create_search_in_section()
 {
     GtkWidget *section = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_hexpand(section, TRUE);
 
     GtkWidget *search_bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
     gtk_widget_set_hexpand(search_bar, TRUE);
@@ -297,6 +298,60 @@ static GtkWidget *create_search_in_section()
     return section;
 }
 
+static void on_setup_list_item(GtkListItemFactory *factory, GtkListItem *item, gpointer user_data)
+{
+    GtkWidget *label = gtk_label_new(NULL);
+    gtk_widget_set_hexpand(label, TRUE);
+    gtk_list_item_set_child(item, label);
+    g_object_bind_property(gtk_list_item_get_item(item), "string", label, "label", G_BINDING_SYNC_CREATE);
+}
+
+static GtkWidget *create_package_details_table(GtkStringList *package_table_header_items)
+{
+    GtkSingleSelection *sel = gtk_single_selection_new(G_LIST_MODEL(package_table_header_items));
+    
+    GtkListItemFactory *factory = gtk_signal_list_item_factory_new();
+    g_signal_connect(factory, "setup", G_CALLBACK(on_setup_list_item), NULL);
+
+    GtkColumnViewColumn *package_column = gtk_column_view_column_new("Package", factory);
+    gtk_column_view_column_set_expand(package_column, TRUE);
+
+    GtkColumnViewColumn *summary_column = gtk_column_view_column_new("Summary", factory);
+    gtk_column_view_column_set_expand(summary_column, TRUE);
+
+    GtkColumnViewColumn *installed_column = gtk_column_view_column_new("Installed(Available)", factory);
+    gtk_column_view_column_set_expand(installed_column, TRUE);
+
+    GtkColumnViewColumn *size_column = gtk_column_view_column_new("Size", factory);
+    gtk_column_view_column_set_expand(size_column, TRUE);
+
+    GtkWidget *column_view = gtk_column_view_new(GTK_SELECTION_MODEL(sel));
+    gtk_widget_set_hexpand(column_view, TRUE);
+    gtk_widget_set_vexpand(column_view, TRUE);
+    gtk_column_view_append_column(GTK_COLUMN_VIEW(column_view), package_column);
+    gtk_column_view_append_column(GTK_COLUMN_VIEW(column_view), summary_column);
+    gtk_column_view_append_column(GTK_COLUMN_VIEW(column_view), installed_column);
+    gtk_column_view_append_column(GTK_COLUMN_VIEW(column_view), size_column);
+
+    return column_view;
+}
+
+static GtkWidget *create_package_details_section()
+{
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_hexpand(box, TRUE);
+    gtk_widget_set_vexpand(box, TRUE);
+
+    GtkStringList *package_table_rows = gtk_string_list_new((const char *[]){
+        NULL
+    });
+
+    GtkWidget *package_details_table = create_package_details_table(package_table_rows);
+    
+    gtk_box_append(GTK_BOX(box), package_details_table);
+    return box;
+}
+
 GtkWidget *create_main_window(GtkApplication *app, gpointer user_data)
 {
     GtkWidget *window = gtk_application_window_new(app);
@@ -305,6 +360,7 @@ GtkWidget *create_main_window(GtkApplication *app, gpointer user_data)
 
     GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
     gtk_window_set_child(GTK_WINDOW(window), box);
+    gtk_widget_set_hexpand(box, TRUE);
 
     GtkWidget *menu_bar = create_menu_bar();
     gtk_box_append(GTK_BOX(box), menu_bar);
@@ -312,8 +368,14 @@ GtkWidget *create_main_window(GtkApplication *app, gpointer user_data)
     GtkWidget *stack = create_task_switcher();
     gtk_box_append(GTK_BOX(box), stack);
 
-    GtkWidget *search_in_section = create_search_in_section();
-    gtk_box_append(GTK_BOX(box), search_in_section);
-    
+    GtkWidget *search_in_section = create_search_in_section();    
+    GtkWidget *package_details_section = create_package_details_section();
+
+    GtkWidget *paned = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_paned_set_start_child(GTK_PANED(paned), search_in_section);
+    gtk_paned_set_end_child(GTK_PANED(paned), package_details_section);
+
+    gtk_box_append(GTK_BOX(box), paned);
+
     return window;
 }
